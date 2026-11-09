@@ -351,6 +351,14 @@ footer.foot { border-top: 1px solid var(--rule); padding-block: 18px 30px; color
   .pager .pg-tool { padding: 10px 9px; font-size: .9rem; }
 }
 
+/* ---------- prova di verifica ---------- */
+.prova-list { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+.es { border: 2px solid var(--rule); border-radius: 12px; padding: 16px; display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+.es > * { min-width: 0; }
+.es.es-ok { border-color: var(--ok); }
+.es-sol { display: grid; gap: 12px; background: var(--paper); border-radius: 10px; padding: 14px; grid-template-columns: minmax(0, 1fr); }
+.es-sol > * { min-width: 0; }
+
 </style>
 </head>
 <body>
@@ -384,7 +392,7 @@ footer.foot { border-top: 1px solid var(--rule); padding-block: 18px 30px; color
       <li><span class="n">C</span><span><b>sen x = cos x</b> e le sue varianti.<span class="ex">Esempio: sen x = cos x, oppure sen x = −cos x</span><small>Tappa 8.</small></span></li>
     </ol>
     <p>Poi ci sono tre argomenti in più che usano gli stessi metodi: <b>archi associati</b> (tappa 9), <b>sen² x + cos² x = 1 e le equazioni di secondo grado</b> (tappa 10), <b>formule di addizione e duplicazione</b> (tappa 11).</p>
-    <div class="row"><a class="btn primary" href="#t0">Comincia dalla tappa 0</a><a class="btn" href="#foglietto">Il foglietto con tutte le formule</a><a class="btn" href="#flash">Domande flash</a></div>
+    <div class="row"><a class="btn primary" href="#t0">Comincia dalla tappa 0</a><a class="btn" href="#prova">Prova di verifica</a><a class="btn" href="#foglietto">Il foglietto con tutte le formule</a><a class="btn" href="#flash">Domande flash</a></div>
   </section>
 
   <nav class="card" aria-label="Tappe">
@@ -403,7 +411,8 @@ footer.foot { border-top: 1px solid var(--rule); padding-block: 18px 30px; color
       <li><a href="#t10"><span>sen² x + cos² x = 1 e il secondo grado</span></a></li>
       <li><a href="#t11"><span>Formule di addizione e duplicazione</span></a></li>
     </ol>
-    <p class="small muted">Dopo l'ultima tappa: il <a href="#foglietto">foglietto</a> con tutte le formule, dieci domande <a href="#vf">vero/falso</a> e le <a href="#flash">domande flash</a>.</p>
+    <a class="btn primary" href="#prova">Alla fine: la prova di verifica, con le soluzioni passo passo</a>
+    <p class="small muted">Dopo la prova: il <a href="#foglietto">foglietto</a> con tutte le formule, dieci domande <a href="#vf">vero/falso</a> e le <a href="#flash">domande flash</a>.</p>
   </nav>
 </section>
 
@@ -1272,8 +1281,19 @@ footer.foot { border-top: 1px solid var(--rule); padding-block: 18px 30px; color
   </div>
 
   <div class="try" data-guided="g-add"></div>
-  <div class="endrow"><label class="done"><input type="checkbox" data-done="t11"> Ho capito questa tappa</label><a class="btn next" href="#foglietto">Il foglietto →</a></div>
+  <div class="endrow"><label class="done"><input type="checkbox" data-done="t11"> Ho capito questa tappa</label><a class="btn next" href="#prova">Prova di verifica →</a></div>
 </article>
+
+<!-- ===================== PROVA DI VERIFICA ===================== -->
+<section class="card view" id="prova">
+  <h2>Prova di verifica</h2>
+  <p class="lead2">Sette esercizi come quelli del compito: un'espressione, gli archi associati, due equazioni, sen x e cos x, il secondo grado e una formula di addizione. Prova da solo, poi tocca <b>Controlla</b>. Se ti blocchi, apri <b>Soluzione passo passo</b>.</p>
+  <p class="small muted">Con <b>Nuova prova</b> cambiano tutti i numeri: puoi allenarti quanto vuoi.</p>
+  <div class="row"><button type="button" class="btn" data-prova="new">Nuova prova ↻</button></div>
+  <div id="prova-list" class="prova-list"></div>
+  <p class="fb" id="prova-score" aria-live="polite"></p>
+  <div class="endrow"><button type="button" class="btn" data-prova="new">Nuova prova ↻</button><a class="btn next" href="#foglietto">Il foglietto →</a></div>
+</section>
 
 <!-- ===================== FOGLIETTO ===================== -->
 <section class="card view" id="foglietto">
@@ -2068,6 +2088,267 @@ footer.foot { border-top: 1px solid var(--rule); padding-block: 18px 30px; color
 
 </script>
 <script>
+/* Generatori della «Prova di verifica»: esercizi come quelli del compito, con la soluzione passo passo.
+   Nessun accesso al DOM: si testa in Node. Ogni esercizio restituisce
+   { tipo, consegna, testo, risposta: { type: 'num', value } | { type: 'deg', sols }, passi: [{ cosa, formula }], risultato } */
+(function (root) {
+  'use strict';
+  const T = (typeof module !== 'undefined' && module.exports) ? require('./engine.js') : root.TRIG;
+  const MINUS = '−';
+  const FN = T.FN_IT;
+  const pick = (r, a) => a[Math.floor(r() * a.length)];
+  const ex = v => T.exactStr(v);
+  // "+ 3", "− 2 sen x", "sen x" …  (c intero)
+  function tm(c, body, first) {
+    if (!c) return '';
+    const a = Math.abs(c);
+    const core = body ? ((a === 1 ? '' : a + ' ') + body) : String(a);
+    return first ? (c < 0 ? MINUS : '') + core : (c < 0 ? ' ' + MINUS + ' ' : ' + ') + core;
+  }
+  function join(terms) {
+    let s = '';
+    terms.forEach(([c, b]) => { if (c) s += tm(c, b, s === ''); });
+    return s || '0';
+  }
+  // valore esatto con il segno davanti, per scrivere somme: "+ 1/2", "− √3/2"
+  const signed = (v, first) => { const e = ex(Math.abs(v)); return first ? (v < 0 ? MINUS : '') + e : (v < 0 ? ' ' + MINUS + ' ' : ' + ') + e; };
+  const par = v => v < 0 ? '(' + ex(v) + ')' : ex(v);
+  const degTxt = d => T.fmt(T.round(d, 2)) + '°';
+  const radTxt = d => T.isNiceDeg(d) ? T.degToRadStr(d) : '≈ ' + T.fmt(T.round(d * T.RAD, 2));
+  const solTxt = sols => sols.map(d => 'x = ' + degTxt(d) + ' = ' + radTxt(d) + ' + 2kπ').join('   ');
+
+  // passi per finire un'equazione elementare  fn x = v  (tappa 6)
+  function finish(fn, v, vTxt) {
+    const r = T.solveBasic(fn, v);
+    const name = FN[fn] + ' x';
+    if (r.impossible) return { passi: [{ cosa: vTxt + ' è fuori da −1 … 1: impossibile.' }], sols: [] };
+    const special = r.sols.length === 1 || (fn !== 'tan' && Math.abs(v) === 1) || v === 0;
+    const pos = v >= 0;
+    const rule = { sin: pos ? 'α e 180° − α' : '180° + α e 360° − α', cos: pos ? 'α e 360° − α' : '180° − α e 180° + α', tan: pos ? 'α e 180° + α' : '180° − α e 360° − α' }[fn];
+    const passi = [];
+    if (special) passi.push({ cosa: 'Caso speciale della tappa 6: ' + name + ' = ' + vTxt + (r.sols.length === 1 ? ' solo a ' : ' a ') + r.sols.map(degTxt).join(' e ') + '.' });
+    else {
+      passi.push({ cosa: 'Angolo base: ' + FN[fn] + ' α = ' + ex(Math.abs(v)) + ', quindi α = ' + degTxt(r.base) + '.' });
+      passi.push({ cosa: 'Numero ' + (pos ? 'positivo' : 'negativo') + ' con ' + ({ sin: 'il seno', cos: 'il coseno', tan: 'la tangente' }[fn]) + ': ' + rule + '.', formula: r.sols.map(degTxt).join('   e   ') });
+    }
+    return { passi: passi, sols: r.sols };
+  }
+
+  // ---------------------------------------------------------------- tipo A: espressione
+  const ANG_A = [0, 30, 45, 60, 90, 180, 270];
+  // risultato «da compito»: intero, frazione o radice semplice
+  const nice = v => Number.isInteger(T.clean(v)) || !!T.recognize(v, { pi: false });
+  const retry = gen => r => { let e; for (let i = 0; i < 40; i++) { e = gen(r); if (e.risposta.type !== 'num' || nice(e.risposta.value)) return e; } return e; };
+  const genA = retry(genA0);
+  function genA0(r) {
+    const rad = r() < 0.35;
+    const at = d => rad ? (T.degToRadStr(d).includes('/') ? '(' + T.degToRadStr(d) + ')' : T.degToRadStr(d)) : d + '°';
+    const val = (f, a) => T.trigDeg(f, a);
+    const one = () => { const f = pick(r, ['sin', 'cos', 'sin', 'cos', 'tan']); let a = pick(r, ANG_A); if (f === 'tan' && (a === 90 || a === 270)) a = 45; return [f, a]; };
+    const txt = ([f, a]) => FN[f] + ' ' + at(a);
+    const passi = [];
+    let testo, value;
+    if (r() < 0.5) {
+      // (f1 a1 ± f2 a2) · (f3 a3 ± f4 a4)
+      const p = [one(), one(), one(), one()];
+      const s1 = pick(r, [1, -1]), s2 = pick(r, [1, -1]);
+      const op = s => s > 0 ? ' + ' : ' ' + MINUS + ' ';
+      testo = '(' + txt(p[0]) + op(s1) + txt(p[1]) + ') · (' + txt(p[2]) + op(s2) + txt(p[3]) + ')';
+      const v = p.map(q => val(q[0], q[1]));
+      if (rad) passi.push({ cosa: 'Traduci gli angoli in gradi: ' + Array.from(new Set(p.map(q => q[1]))).map(a => T.degToRadStr(a) + ' = ' + a + '°').join(', ') + '.' });
+      passi.push({ cosa: 'Sostituisci i valori della tabella.', formula: '(' + par(v[0]) + op(s1) + par(v[1]) + ') · (' + par(v[2]) + op(s2) + par(v[3]) + ')' });
+      const A = T.clean(v[0] + s1 * v[1]), B = T.clean(v[2] + s2 * v[3]);
+      passi.push({ cosa: 'Calcola dentro le parentesi.', formula: '(' + ex(A) + ') · (' + ex(B) + ')' });
+      value = T.clean(A * B);
+      passi.push({ cosa: (A === 0 || B === 0) ? 'C’è uno 0 nella moltiplicazione: tutto vale 0.' : 'Moltiplica.', formula: ex(value) });
+    } else {
+      const n = pick(r, [2, 3]);
+      const parts = [];
+      for (let i = 0; i < n; i++) {
+        const form = pick(r, ['prod', 'coef', 'single']);
+        const sg = i === 0 ? 1 : pick(r, [1, -1]);
+        if (form === 'prod') { const a = one(), b = [pick(r, ['sin', 'cos']), pick(r, [30, 45, 60, 90, 180])]; parts.push({ sg, t: txt(a) + ' · ' + txt(b), sub: par(val(a[0], a[1])) + ' · ' + par(val(b[0], b[1])), v: T.clean(val(a[0], a[1]) * val(b[0], b[1])) }); }
+        else if (form === 'coef') { const c = pick(r, [2, 3, 4]), a = one(); parts.push({ sg, t: c + ' ' + txt(a), sub: c + ' · ' + par(val(a[0], a[1])), v: T.clean(c * val(a[0], a[1])) }); }
+        else { const a = one(); parts.push({ sg, t: txt(a), sub: par(val(a[0], a[1])), v: val(a[0], a[1]) }); }
+      }
+      const op = (s, i) => i === 0 ? '' : (s > 0 ? ' + ' : ' ' + MINUS + ' ');
+      testo = parts.map((q, i) => op(q.sg, i) + q.t).join('');
+      if (rad) passi.push({ cosa: 'Se ti aiuta, traduci gli angoli in gradi (π = 180°).' });
+      passi.push({ cosa: 'Sostituisci i valori della tabella.', formula: parts.map((q, i) => op(q.sg, i) + q.sub).join('') });
+      passi.push({ cosa: 'Fai le moltiplicazioni, un pezzo alla volta.', formula: parts.map((q, i) => i === 0 ? (q.v < 0 ? MINUS : '') + ex(Math.abs(q.v)) : signed(q.sg * q.v, false)).join('') });
+      value = T.clean(parts.reduce((s, q) => s + q.sg * q.v, 0));
+      passi.push({ cosa: 'Somma tutto e semplifica.', formula: ex(value) });
+    }
+    return { tipo: 'Tipo A · espressione', consegna: 'Calcola il valore dell’espressione.', testo, risposta: { type: 'num', value }, passi, risultato: ex(value) };
+  }
+
+  // ---------------------------------------------------------------- archi associati
+  const BIG = [120, 135, 150, 210, 225, 240, 300, 315, 330];
+  function assocStep(f, a) {
+    let ref, form, q;
+    if (a < 180) { ref = 180 - a; form = '180° − ' + ref + '°'; q = 'II'; }
+    else if (a < 270) { ref = a - 180; form = '180° + ' + ref + '°'; q = 'III'; }
+    else { ref = 360 - a; form = '360° − ' + ref + '°'; q = 'IV'; }
+    const v = T.trigDeg(f, a);
+    const nome = { sin: 'il seno', cos: 'il coseno', tan: 'la tangente' }[f];
+    return { v, cosa: a + '° = ' + form + ': ' + q + ' quadrante, ' + nome + ' è ' + (v > 0 ? 'positivo' : 'negativo').replace('positivo', f === 'tan' ? 'positiva' : 'positivo').replace('negativo', f === 'tan' ? 'negativa' : 'negativo') + '.', formula: FN[f] + ' ' + a + '° = ' + (v < 0 ? MINUS : '') + FN[f] + ' ' + ref + '° = ' + ex(v) };
+  }
+  const genAssoc = retry(genAssoc0);
+  function genAssoc0(r) {
+    const f1 = pick(r, ['sin', 'cos']), f2 = pick(r, ['sin', 'cos', 'tan']);
+    const a1 = pick(r, BIG); let a2 = pick(r, BIG); if (a2 === a1) a2 = BIG[(BIG.indexOf(a1) + 4) % BIG.length];
+    const op = pick(r, ['+', '−', '·']);
+    const s1 = assocStep(f1, a1), s2 = assocStep(f2, a2);
+    const testo = FN[f1] + ' ' + a1 + '° ' + op + ' ' + FN[f2] + ' ' + a2 + '°';
+    const value = T.clean(op === '+' ? s1.v + s2.v : op === '−' ? s1.v - s2.v : s1.v * s2.v);
+    const passi = [
+      { cosa: s1.cosa, formula: s1.formula },
+      { cosa: s2.cosa, formula: s2.formula },
+      { cosa: 'Metti insieme.', formula: par(s1.v) + ' ' + op + ' ' + par(s2.v) + ' = ' + ex(value) }
+    ];
+    return { tipo: 'Archi associati', consegna: 'Calcola senza calcolatrice (usa gli archi associati).', testo, risposta: { type: 'num', value }, passi, risultato: ex(value) };
+  }
+
+  // ---------------------------------------------------------------- tipo B: equazione da sistemare
+  const KV_INT = [['cos 180°', -1], ['sen 90°', 1], ['cos 0°', 1], ['sen 270°', -1], ['tan 45°', 1], ['tan 135°', -1], ['cos 360°', 1]];
+  const KV_HALF = [['sen 30°', 0.5], ['cos 60°', 0.5]];
+  const VALS = {
+    sin: [['1/2', 0.5, 1, 2], ['−1/2', -0.5, -1, 2], ['√2/2', Math.SQRT2 / 2, '√2', 2], ['−√2/2', -Math.SQRT2 / 2, '−√2', 2], ['√3/2', Math.sqrt(3) / 2, '√3', 2], ['−√3/2', -Math.sqrt(3) / 2, '−√3', 2], ['1', 1, 1, 1], ['−1', -1, -1, 1], ['0', 0, 0, 1]],
+    tan: [['1', 1, 1, 1], ['−1', -1, -1, 1], ['√3', Math.sqrt(3), '√3', 1], ['−√3', -Math.sqrt(3), '−√3', 1], ['√3/3', Math.sqrt(3) / 3, '√3', 3], ['−√3/3', -Math.sqrt(3) / 3, '−√3', 3]]
+  };
+  VALS.cos = VALS.sin;
+  function genB(r) {
+    const f = pick(r, ['sin', 'cos', 'tan', 'sin', 'cos']);
+    const fx = FN[f] + ' x';
+    const [vStr, v, kv, k] = pick(r, VALS[f]);
+    const s = pick(r, [1, -1, 2]);
+    const m = k * s;
+    const a1 = pick(r, [2, 3, 4]);
+    const c1 = a1 - m;
+    const b1 = pick(r, [1, -1, 2, -2, 3]);
+    const half = r() < 0.35;
+    const kv1 = half ? pick(r, KV_HALF) : pick(r, KV_INT);
+    const w1 = half ? pick(r, [2, 4, -2]) : pick(r, [1, -1, 2]);
+    const K1 = T.clean(w1 * kv1[1]);
+    // parte con la radice (se il risultato è irrazionale) e parte intera
+    let rootTxt = '', rootPlain = '', Rint = 0;
+    if (typeof kv === 'number') Rint = s * kv;
+    else {
+      const neg = (kv[0] === MINUS) !== (s < 0);
+      const body = (Math.abs(s) === 1 ? '' : Math.abs(s)) + kv.replace(MINUS, '');
+      const withKV = r() < 0.5 ? pick(r, [['sen 90°', 1], ['cos 0°', 1], ['tan 45°', 1]]) : null;
+      rootPlain = (neg ? MINUS : '') + body;
+      rootTxt = (neg ? ' ' + MINUS + ' ' : ' + ') + body + (withKV ? ' · ' + withKV[0] : '');
+      if (withKV) rootTxt = { txt: rootTxt, kv: withKV[0] };
+    }
+    const rTxt = typeof rootTxt === 'object' ? rootTxt.txt : rootTxt;
+    const rKV = typeof rootTxt === 'object' ? rootTxt.kv : null;
+    const L0 = a1 * b1 + K1;
+    const d = Rint + L0;
+    const kvTerm = (w, name) => (w < 0 ? ' ' + MINUS + ' ' : ' + ') + (Math.abs(w) === 1 ? '' : Math.abs(w) + ' ') + name;
+    const left = a1 + ' (' + fx + (b1 < 0 ? ' ' + MINUS + ' ' : ' + ') + Math.abs(b1) + ')' + kvTerm(w1, kv1[0]);
+    const rightCore = join([[c1, fx], [d, '']]);
+    const right = (rightCore === '0' && rTxt ? '' : rightCore) + (rTxt ? (rightCore === '0' ? rTxt.trim().replace(/^\+ /, '') : rTxt) : '');
+    const testo = left + ' = ' + right;
+    const rootAfter = rTxt ? (rightCore === '0' ? rootPlain : (rootPlain[0] === MINUS ? ' ' + MINUS + ' ' + rootPlain.slice(1) : ' + ' + rootPlain)) : '';
+    const passi = [];
+    const subs = [kv1[0] + ' = ' + ex(kv1[1])].concat(rKV ? [rKV + ' = 1'] : []);
+    passi.push({ cosa: 'Sostituisci i valori noti: ' + subs.join(', ') + '.' + (Math.abs(w1) !== 1 || kv1[1] < 0 ? ' Il pezzo ' + kvTerm(w1, kv1[0]).trim() + ' diventa ' + signed(K1, true).replace(/^([^−])/, '+ $1').replace(/^−/, '− ') + '.' : ''),
+      formula: a1 + ' (' + fx + (b1 < 0 ? ' ' + MINUS + ' ' : ' + ') + Math.abs(b1) + ')' + signed(K1, false) + ' = ' + rightCore.replace(/^0$/, '') + rootAfter });
+    passi.push({ cosa: 'Togli la parentesi: ' + a1 + ' moltiplica tutti e due i pezzi.', formula: join([[a1, fx], [a1 * b1, ''], [K1, '']]) + ' = ' + rightCore.replace(/^0$/, '') + rootAfter });
+    const leftMoved = [[a1, fx], [-c1, fx]];
+    const rightMoved = (d ? tm(d, '', true) : '') + (rootPlain ? (d ? (rootPlain[0] === MINUS ? ' ' + MINUS + ' ' + rootPlain.slice(1) : ' + ' + rootPlain) : rootPlain) : '') + tm(-a1 * b1, '', !d && !rootPlain) + tm(-K1, '', !d && !rootPlain && !(a1 * b1));
+    passi.push({ cosa: 'Porta i ' + fx + ' a sinistra e i numeri a destra: chi passa dall’altra parte cambia segno.', formula: join(leftMoved) + ' = ' + (rightMoved || '0') });
+    const R = T.clean(m * v);
+    const Rtxt = rootPlain ? rootPlain : ex(R);
+    passi.push({ cosa: c1 === 0 ? 'Somma i numeri a destra.' : 'Somma: ' + a1 + (c1 < 0 ? ' + ' + (-c1) : ' − ' + c1) + ' = ' + ex(m) + ' a sinistra, e somma i numeri a destra.', formula: tm(m, fx, true) + ' = ' + Rtxt });
+    if (m !== 1) passi.push({ cosa: 'Dividi tutti e due i lati per ' + (m < 0 ? MINUS + (-m) : m) + '.' + (rootPlain && k === 3 ? ' Razionalizza se serve: 1/√3 = √3/3.' : ''), formula: fx + ' = ' + vStr });
+    const fin = finish(f, v, vStr);
+    fin.passi.forEach(p => passi.push(p));
+    return { tipo: 'Tipo B · equazione', consegna: 'Risolvi l’equazione. Scrivi le soluzioni tra 0° e 360°.', testo, risposta: { type: 'deg', sols: fin.sols }, passi, risultato: solTxt(fin.sols), f, v };
+  }
+
+  // ---------------------------------------------------------------- tipo C: sen x = cos x
+  const C_LIST = [
+    ['sen x = cos x', 'tan x = 1', null, 1, '1'],
+    ['sen x = −cos x', 'tan x = −1', null, -1, '−1'],
+    ['√3 sen x = cos x', '√3 tan x = 1', 'tan x = 1/√3 = √3/3', Math.sqrt(3) / 3, '√3/3'],
+    ['sen x = √3 cos x', 'tan x = √3', null, Math.sqrt(3), '√3'],
+    ['sen x = −√3 cos x', 'tan x = −√3', null, -Math.sqrt(3), '−√3'],
+    ['√3 sen x = −cos x', '√3 tan x = −1', 'tan x = −1/√3 = −√3/3', -Math.sqrt(3) / 3, '−√3/3'],
+    ['2 sen x = 2 cos x', '2 tan x = 2', 'tan x = 1', 1, '1'],
+    ['3 sen x = √3 cos x', '3 tan x = √3', 'tan x = √3/3', Math.sqrt(3) / 3, '√3/3'],
+    ['sen x + cos x = 0', 'sen x = −cos x  →  tan x = −1', null, -1, '−1']
+  ];
+  function genC(r) {
+    const [testo, s1, s2, v, vStr] = pick(r, C_LIST);
+    const passi = [{ cosa: 'Dividi tutti e due i lati per cos x (sen x : cos x = tan x).', formula: s1 }];
+    if (s2) passi.push({ cosa: 'Dividi per il numero davanti a tan x.', formula: s2 });
+    const fin = finish('tan', v, vStr);
+    fin.passi.forEach(p => passi.push(p));
+    return { tipo: 'Tipo C · sen x e cos x', consegna: 'Risolvi l’equazione. Scrivi le soluzioni tra 0° e 360°.', testo, risposta: { type: 'deg', sols: fin.sols }, passi, risultato: solTxt(fin.sols) };
+  }
+
+  // ---------------------------------------------------------------- secondo grado
+  const ROOTS = [[[1, 1], [1, 2]], [[-1, 1], [1, 2]], [[1, 1], [-1, 2]], [[-1, 1], [-1, 2]], [[0, 1], [1, 2]], [[0, 1], [-1, 1]], [[0, 1], [1, 1]], [[1, 2], [-1, 2]], [[2, 1], [1, 2]], [[-2, 1], [-1, 2]], [[1, 1], [-1, 1]], [[2, 1], [-1, 2]]];
+  function gen2(r) {
+    const f = pick(r, ['sin', 'cos']);
+    const [[p1, q1], [p2, q2]] = pick(r, ROOTS);
+    let a = q1 * q2, b = -(q1 * p2 + q2 * p1), c = p1 * p2;
+    if (r() < 0.3 && b !== 0) { a *= -1; b *= -1; c *= -1; }   // a volte con a negativo
+    const sq = FN[f] + '² x', fx = FN[f] + ' x';
+    const testo = join([[a, sq], [b, fx], [c, '']]) + ' = 0';
+    const passi = [];
+    if (a < 0) { passi.push({ cosa: 'Moltiplica tutto per −1 (cambiano tutti i segni): è più comodo con il primo numero positivo.', formula: join([[-a, sq], [-b, fx], [-c, '']]) + ' = 0' }); a = -a; b = -b; c = -c; }
+    passi.push({ cosa: 'Chiama t = ' + fx + '.', formula: join([[a, 't²'], [b, 't'], [c, '']]) + ' = 0   (a = ' + ex(a) + ', b = ' + ex(b) + ', c = ' + ex(c) + ')' });
+    const D = b * b - 4 * a * c;
+    passi.push({ cosa: 'Calcola il delta: Δ = b² − 4ac.', formula: 'Δ = ' + (b < 0 ? '(' + ex(b) + ')' : ex(b)) + '² − 4 · ' + ex(a) + ' · ' + par(c) + ' = ' + D });
+    const sD = Math.sqrt(D);
+    const t1 = T.clean((-b + sD) / (2 * a)), t2 = T.clean((-b - sD) / (2 * a));
+    passi.push({ cosa: 't = (−b ± √Δ) / 2a, con √Δ = ' + T.fmt(sD) + '.', formula: 't₁ = (' + ex(-b) + ' + ' + T.fmt(sD) + ')/' + 2 * a + ' = ' + ex(t1) + '   t₂ = (' + ex(-b) + ' − ' + T.fmt(sD) + ')/' + 2 * a + ' = ' + ex(t2) });
+    let sols = [];
+    [t1, t2].forEach((t, i) => {
+      if (Math.abs(t) > 1) { passi.push({ cosa: fx + ' = ' + ex(t) + ': è fuori da −1 … 1, si scarta (impossibile).' }); return; }
+      const fin = finish(f, t, ex(t));
+      passi.push({ cosa: 'Torna a ' + fx + ' = ' + ex(t) + '.' });
+      fin.passi.forEach(p => passi.push(p));
+      sols = sols.concat(fin.sols);
+    });
+    sols = Array.from(new Set(sols.map(x => T.clean(x)))).sort((x, y) => x - y);
+    return { tipo: 'Secondo grado', consegna: 'Risolvi l’equazione. Scrivi tutte le soluzioni tra 0° e 360°.', testo, risposta: { type: 'deg', sols }, passi, risultato: solTxt(sols) };
+  }
+
+  // ---------------------------------------------------------------- formule di addizione
+  const ADD = [['sin', 75, 45, 30, '+'], ['cos', 75, 45, 30, '+'], ['sin', 15, 45, 30, '−'], ['cos', 15, 45, 30, '−'], ['sin', 105, 60, 45, '+'], ['cos', 105, 60, 45, '+'], ['sin', 15, 60, 45, '−'], ['cos', 15, 60, 45, '−']];
+  function genAdd(r) {
+    const [f, ang, a, b, op] = pick(r, ADD);
+    const S = d => T.trigDeg('sin', d), C = d => T.trigDeg('cos', d);
+    let formula, p1, p2, opRes;
+    if (f === 'sin') { formula = 'sen (a ' + op + ' b) = sen a · cos b ' + op + ' cos a · sen b'; p1 = [S(a), C(b), 'sen ' + a + '° · cos ' + b + '°']; p2 = [C(a), S(b), 'cos ' + a + '° · sen ' + b + '°']; opRes = op; }
+    else { formula = 'cos (a ' + op + ' b) = cos a · cos b ' + (op === '+' ? MINUS : '+') + ' sen a · sen b'; p1 = [C(a), C(b), 'cos ' + a + '° · cos ' + b + '°']; p2 = [S(a), S(b), 'sen ' + a + '° · sen ' + b + '°']; opRes = op === '+' ? MINUS : '+'; }
+    const x1 = T.clean(p1[0] * p1[1]), x2 = T.clean(p2[0] * p2[1]);
+    const value = T.clean(opRes === '+' ? x1 + x2 : x1 - x2);
+    const passi = [
+      { cosa: 'Scrivi ' + ang + '° con due angoli della tabella.', formula: FN[f] + ' ' + ang + '° = ' + FN[f] + ' (' + a + '° ' + op + ' ' + b + '°)' },
+      { cosa: 'Usa la formula.', formula: formula },
+      { cosa: 'Sostituisci.', formula: ex(p1[0]) + ' · ' + ex(p1[1]) + ' ' + opRes + ' ' + ex(p2[0]) + ' · ' + ex(p2[1]) },
+      { cosa: 'Moltiplica (√2 · √3 = √6).', formula: ex(x1) + ' ' + opRes + ' ' + ex(x2) },
+      { cosa: 'Stesso denominatore: metti insieme sopra.', formula: ex(value) }
+    ];
+    return { tipo: 'Formule di addizione', consegna: 'Calcola senza calcolatrice con le formule di addizione. Puoi scrivere il risultato esatto o il numero con 4 cifre.', testo: FN[f] + ' ' + ang + '°', risposta: { type: 'num', value }, passi, risultato: ex(value) + ' ≈ ' + T.fmt(T.round(value, 4)) };
+  }
+
+  function genProva(seed) {
+    const r = T.rng(seed);
+    return [genA(r), genAssoc(r), genB(r), genB(r), genC(r), gen2(r), genAdd(r)];
+  }
+  const API = { genProva, genA, genAssoc, genB, genC, gen2, genAdd };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API;
+  else root.PROVA = API;
+})(typeof window !== 'undefined' ? window : this);
+
+</script>
+<script>
 /* Interfaccia del ripasso: tappe, esercizi guidati, disegni, strumenti, allenamento, vero/falso e domande flash. */
 (function () {
   'use strict';
@@ -2771,6 +3052,67 @@ footer.foot { border-top: 1px solid var(--rule); padding-block: 18px 30px; color
     shuffle(); render();
   }
 
+  // ---------------------------------------------------------------- prova di verifica
+  // testo semplice → frazioni e radici disegnate: "√3/2", "(√6+√2)/4", "5π/6", "−1/2"
+  function fmtMath(t) {
+    let s = esc(t).replace(/ {3,}/g, '&nbsp;&nbsp;&nbsp;');
+    s = s.replace(/\(([^()]+)\)\/(\d+)/g, (m, a, b) => '<span class="frac"><span>' + a + '</span><span>' + b + '</span></span>');
+    s = s.replace(/(\d*√\d+|\d*π|\d+)\/(\d+)/g, (m, a, b) => '<span class="frac"><span>' + a + '</span><span>' + b + '</span></span>');
+    return s.replace(/√(\d+)/g, '<span class="rt">√<span>$1</span></span>');
+  }
+  function initProva() {
+    const list = $('#prova-list'); if (!list || !window.PROVA) return;
+    const score = $('#prova-score');
+    const ok = {};
+    function render() {
+      if (!S.provaSeed) { S.provaSeed = Math.floor(Math.random() * 1e9) + 1; save(); }
+      const items = window.PROVA.genProva(S.provaSeed);
+      Object.keys(ok).forEach(k => delete ok[k]);
+      score.textContent = '';
+      list.innerHTML = items.map((e, i) => {
+        const n = e.risposta.type === 'deg' ? e.risposta.sols.length : 1;
+        const ins = e.risposta.type === 'deg'
+          ? Array.from({ length: n }, (_, k) => inputRow({ pre: 'x =', post: '°' }, k, 'Soluzione in gradi')).join('') + '<p class="small muted">' + (n === 1 ? 'Una soluzione' : n + ' soluzioni') + ' tra 0° e 360°, in gradi, in qualsiasi ordine.</p>'
+          : inputRow({ pre: '=' }, 0, 'Risultato') + chipRow(['√', '/', '−', '(', ')']);
+        return '<article class="es" data-i="' + i + '"><p class="lab">Esercizio ' + (i + 1) + ' · ' + esc(e.tipo) + '</p>' +
+          '<p class="small">' + esc(e.consegna) + '</p><p class="task">' + fmtMath(e.testo) + '</p>' + ins +
+          '<div class="row"><button type="button" class="btn primary" data-a="check">Controlla</button><button type="button" class="btn" data-a="sol" aria-expanded="false">Soluzione passo passo</button></div>' +
+          '<p class="fb" aria-live="polite"></p>' +
+          '<div class="es-sol" hidden><ol class="ssteps">' + e.passi.map(p => '<li><span class="what">' + fmtMath(p.cosa) + '</span>' + (p.formula ? '<span class="mm">' + fmtMath(p.formula) + '</span>' : '') + '</li>').join('') + '</ol>' +
+          '<p class="result' + (e.risposta.type === 'deg' ? ' sol' : '') + '">' + fmtMath(e.risultato) + '</p></div></article>';
+      }).join('');
+      splitFormulas();
+      list._items = items;
+    }
+    function updateScore() {
+      const n = Object.values(ok).filter(Boolean).length, tot = list._items.length;
+      score.className = 'fb ' + (n === tot ? 'ok' : '');
+      score.textContent = n ? 'Esercizi giusti: ' + n + ' su ' + tot + (n === tot ? '. Complimenti, prova completa!' : '.') : '';
+    }
+    list.addEventListener('focusin', ev => { if (ev.target.tagName === 'INPUT') list._last = ev.target; });
+    list.addEventListener('click', ev => {
+      const b = ev.target.closest('button'); if (!b) return;
+      const card = b.closest('.es'), i = +card.dataset.i, e = list._items[i];
+      if (b.dataset.ins) { const inp = list._last && card.contains(list._last) ? list._last : $('input', card); const a = inp.selectionStart != null ? inp.selectionStart : inp.value.length; inp.value = inp.value.slice(0, a) + b.dataset.ins + inp.value.slice(inp.selectionEnd != null ? inp.selectionEnd : a); inp.focus(); inp.setSelectionRange(a + 1, a + 1); return; }
+      if (b.dataset.a === 'sol') { const s = $('.es-sol', card); s.hidden = !s.hidden; b.setAttribute('aria-expanded', String(!s.hidden)); b.textContent = s.hidden ? 'Soluzione passo passo' : 'Nascondi la soluzione'; return; }
+      if (b.dataset.a === 'check') {
+        const vals = $$('input', card).map(x => x.value), fb = $('.fb', card);
+        if (vals.some(v => !v.trim())) { fb.className = 'fb ko'; fb.textContent = vals.length > 1 ? 'Riempi tutte le caselle.' : 'Scrivi una risposta.'; return; }
+        let r;
+        if (e.risposta.type === 'deg') r = T.checkSet(vals, e.risposta.sols, { kind: 'deg', tol: 0.01 });
+        else r = T.check(vals[0], e.risposta.value);
+        ok[i] = !!r.ok;
+        fb.className = 'fb ' + (r.ok ? 'ok' : 'ko');
+        fb.innerHTML = r.ok ? 'Giusto!' + (r.approx ? ' In forma esatta: ' + fmtMath(e.risultato.split(' ≈ ')[0]) + '.' : '') : (r.msg && r.value === undefined ? esc(r.msg) : 'Non ancora. Ricontrolla, oppure apri la soluzione passo passo.');
+        card.classList.toggle('es-ok', !!r.ok);
+        updateScore();
+      }
+    });
+    list.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target.tagName === 'INPUT') { ev.preventDefault(); $('[data-a="check"]', ev.target.closest('.es')).click(); } });
+    $$('[data-prova="new"]').forEach(b => b.addEventListener('click', () => { S.provaSeed = Math.floor(Math.random() * 1e9) + 1; save(); render(); $('#prova').scrollIntoView(); }));
+    render();
+  }
+
   // ---------------------------------------------------------------- avanzamento
   function renderProgress() {
     const n = TAPPE.filter(t => S.done[t]).length;
@@ -2788,7 +3130,7 @@ footer.foot { border-top: 1px solid var(--rule); padding-block: 18px 30px; color
   }
 
   // ---------------------------------------------------------------- una tappa per schermata
-  const TITLES = { home: 'Indice', foglietto: 'Foglietto', vf: 'Vero o falso', flash: 'Domande flash' };
+  const TITLES = { home: 'Indice', prova: 'Prova di verifica', foglietto: 'Foglietto', vf: 'Vero o falso', flash: 'Domande flash' };
   function initViews() {
     const views = $$('.view');
     const prev = $('#pg-prev'), next = $('#pg-next');
@@ -2829,7 +3171,7 @@ footer.foot { border-top: 1px solid var(--rule); padding-block: 18px 30px; color
     splitFormulas();
     initFigs(); initGloss(); initToolCircle(); initToolEq();
     $$('[data-guided]').forEach(renderGuided);
-    initGen(); initVF(); initFlash(); initProgress();
+    initGen(); initProva(); initVF(); initFlash(); initProgress();
     // pulsanti della barra in basso: aprono e chiudono le finestre
     const tools = [['#calc-btn', window.CALC], ['#tab-btn', window.TABELLA]];
     const syncTools = () => tools.forEach(([sel, w]) => { const b = $(sel); if (b && w) b.setAttribute('aria-pressed', String(w.isOpen())); });
@@ -2841,7 +3183,7 @@ footer.foot { border-top: 1px solid var(--rule); padding-block: 18px 30px; color
     });
     syncTools();
     initViews();
-    window.__trig = { GUIDED: GUIDED, FL: FL, VF: VF, S: () => S };
+    window.__trig = { fmtMath: fmtMath, GUIDED: GUIDED, FL: FL, VF: VF, S: () => S };
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
