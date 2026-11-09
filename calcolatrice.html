@@ -6,7 +6,7 @@
 <title>Calcolatrice scientifica</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600;700&display=swap">
 <style>
 /* Una sola colonna da leggere, tappe numerate, caratteri grandi. Stessa struttura del ripasso di
    Telecomunicazioni; per matematica l'accento è viola, il rosso e il blu restano quelli della penna. */
@@ -16,7 +16,7 @@
   --pen-red: #C2293C; --pen-blue: #2646A0; --amber: #A75E05; --sin: #C2293C; --cos: #2646A0; --tan: #19774A;
   --ok: #19774A; --ok-bg: #E2F3E9; --ko: #B3261E; --ko-bg: #FBE8E6; --warn: #8F5600; --warn-bg: #FFF3D9; --focus: #F2A900;
   --f-display: "Barlow Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
-  --f-body: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
+  --f-body: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --f-ui: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color-scheme: light;
 }
@@ -66,8 +66,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hero { display: grid; gap: 12px; padding: 18px 20px 20px; background: var(--sheet); border: 1px solid var(--rule); border-radius: 16px; }
 .hero-art svg { width: 100%; height: 96px; display: block; }
 .eyebrow { font: 600 .8rem/1.2 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--acc-ink); }
-.lead { font: 400 1.15rem/1.6 var(--f-body); color: var(--ink-2); }
-.tip { background: var(--acc-soft); border-radius: 10px; padding: 10px 12px; }
+.lead { font: 400 1.12rem/1.6 var(--f-body); color: var(--ink-2); }
+.tip { color: var(--ink-2); }
 .progress { display: flex; gap: 12px; align-items: center; }
 .bar { flex: 1; height: 10px; background: var(--rule); border-radius: 99px; overflow: hidden; }
 .bar i { display: block; height: 100%; width: 0; background: var(--acc); border-radius: 99px; transition: width .4s; }
@@ -77,12 +77,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .card > *, .tappa > *, .formula > *, .solved > *, .try > *, .box > *, .recipe > * { min-width: 0; }
 .tappa { scroll-margin-top: 80px; }
 h2 .num { font: 700 2rem/1 var(--f-display); background: var(--acc); color: var(--on-acc); border-radius: 10px; min-width: 2.6rem; text-align: center; padding: 4px 8px; flex: none; }
-.lead2 { font: 400 1.1rem/1.6 var(--f-body); }
+.lead2 { font: 400 1.1rem/1.65 var(--f-body); }
 .sub { display: grid; gap: 10px; border-top: 1px dashed var(--rule-strong); padding-top: 14px; grid-template-columns: minmax(0, 1fr); }
 .sub > * { min-width: 0; }
 .plain { padding-left: 1.3em; display: grid; gap: 6px; }
 .why { color: var(--pen-blue); font-style: italic; }
-.txt { font: 400 1.05rem/1.65 var(--f-body); }
+.txt { font: 400 1.05rem/1.85 var(--f-body); }
 
 .toc { margin: 0; padding-left: 0; list-style: none; counter-reset: t -1; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); }
 .toc li { counter-increment: t; }
@@ -97,23 +97,21 @@ h2 .num { font: 700 2rem/1 var(--f-display); background: var(--acc); color: var(
 .types li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; background: var(--paper); border-radius: 10px; padding: 10px 12px; }
 .types .n { font: 700 1.3rem/1 var(--f-display); color: var(--on-acc); background: var(--acc); border-radius: 8px; min-width: 1.8em; text-align: center; padding: 5px 0; }
 .types small { display: block; color: var(--ink-2); margin-top: 2px; }
-.types .ex { font: italic 400 1rem/1.5 var(--f-body); color: var(--ink); }
+.types .ex { display: block; font: 500 1rem/1.5 var(--f-body); color: var(--ink); margin-top: 2px; }
 
 /* ---------- formule ---------- */
-.formula { display: grid; gap: 0; border-radius: 8px; overflow: hidden; border: 1px solid var(--formula); grid-template-columns: minmax(0, 1fr); }
-.fbig { background: var(--formula); padding: 12px 16px 14px; text-align: center; font: 400 1.35rem/1.7 var(--f-body); overflow-x: auto; }
-.fbig::before { content: "Formula"; display: block; text-align: left; font: 700 .72rem/1.2 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--acc-ink); margin-bottom: 4px; }
-.fbig.rule::before { content: "Regola"; }
-.fbig.def::before { content: "Che cos'è"; }
-.means { padding: 12px 16px; font-size: 1rem; background: var(--sheet); display: grid; gap: 6px; }
-.means b:first-child { color: var(--acc-ink); }
+.formula { display: grid; gap: 0; border-radius: 10px; overflow: hidden; background: var(--formula); grid-template-columns: minmax(0, 1fr); }
+.fbig { padding: 14px 16px; text-align: center; font: 500 1.35rem/1.8 var(--f-body); overflow-x: auto; }
+.means { padding: 0 16px 14px; font-size: 1rem; line-height: 1.6; display: grid; gap: 6px; }
+.means b:first-child { color: var(--ink); }
 .m { font-family: var(--f-body); white-space: nowrap; }
-.mm { font: 400 1.25rem/1.7 var(--f-body); text-align: center; overflow-x: auto; padding: 4px 0; }
-.frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 .12em; line-height: 1.15; font-size: .92em; }
+.mm { font: 500 1.3rem/1.8 var(--f-body); text-align: center; overflow-x: auto; padding: 4px 0; }
+.frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 .15em; line-height: 1.2; font-size: .95em; }
 .frac > span:first-child { border-bottom: 1px solid currentColor; padding: 0 .2em; }
 .frac > span:last-child { padding: 0 .2em; }
 .rt { white-space: nowrap; } .rt > span { border-top: 1px solid currentColor; padding: 0 .1em; margin-left: .05em; }
-.s { color: var(--sin); font-weight: 600; } .c { color: var(--cos); font-weight: 600; } .t { color: var(--tan); font-weight: 600; }
+.s, .c, .t { font-weight: 600; }
+figcaption .s, .readout .s { color: var(--sin); } figcaption .c, .readout .c { color: var(--cos); } figcaption .t, .readout .t { color: var(--tan); }
 .nw { display: inline-block; white-space: nowrap; margin-right: 1.1em; }
 .nw:last-child { margin-right: 0; }
 .hl { background: var(--warn-bg); border-radius: 4px; padding: 0 .2em; }
@@ -128,33 +126,29 @@ table.tab tbody th { font: 700 1rem/1.2 var(--f-ui); text-align: left; padding-l
 table.tab tr:last-child td, table.tab tr:last-child th { border-bottom: 0; }
 table.tab.narrow { min-width: 0; }
 
-.warn { background: var(--warn-bg); border: 1px solid var(--warn); border-radius: 8px; padding: 10px 12px; }
-.box { background: var(--paper); border-radius: 10px; padding: 14px 16px; display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr); }
-.box.key { background: var(--acc-soft); border-left: 4px solid var(--acc); }
-.box.key::before { content: "Il trucco"; font: 700 .72rem/1.2 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--acc-ink); }
+.warn, .box { border-left: 4px solid var(--acc); padding: 4px 0 4px 14px; display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr); line-height: 1.7; }
 
 /* ricetta */
-.recipe { border: 2px solid var(--acc); border-radius: 12px; padding: 14px 16px; display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
-.recipe > .lab { background: var(--acc); }
-.recipe ol { margin: 0; padding-left: 0; list-style: none; counter-reset: r; display: grid; gap: 10px; }
+.recipe { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+.recipe > .lab { font-size: .85rem; }
+.recipe ol { margin: 0; padding-left: 0; list-style: none; counter-reset: r; display: grid; gap: 14px; line-height: 1.7; }
 .recipe li { counter-increment: r; position: relative; padding-left: 2.6em; }
 .recipe li::before { content: counter(r); position: absolute; left: 0; top: -1px; width: 1.9em; height: 1.9em; border-radius: 50%; display: grid; place-items: center; font: 700 1rem/1 var(--f-ui); background: var(--acc); color: var(--on-acc); }
-.recipe li b { color: var(--acc-ink); }
+.recipe li b { color: var(--ink); }
 
 /* esempi svolti */
-.solved { background: var(--paper); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
-.lab { display: inline-block; justify-self: start; font: 700 .78rem/1.2 var(--f-ui); letter-spacing: .1em; text-transform: uppercase; background: var(--acc); color: var(--on-acc); padding: 5px 10px; border-radius: 99px; }
-.solved .lab { background: var(--ok); color: var(--sheet); }
-.task { font: 400 1.2rem/1.6 var(--f-body); overflow-x: auto; padding: 2px 0; }
-.ssteps { list-style: none; padding-left: 0; margin: 0; counter-reset: s; display: grid; gap: 10px; }
+.solved { background: var(--paper); border-radius: 12px; padding: 16px; display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+.lab { display: block; justify-self: start; font: 700 .78rem/1.2 var(--f-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+.task { font: 600 1.25rem/1.7 var(--f-body); overflow-x: auto; padding: 2px 0; }
+.ssteps { list-style: none; padding-left: 0; margin: 0; counter-reset: s; display: grid; gap: 14px; }
 .ssteps > li { counter-increment: s; position: relative; padding-left: 2.4em; display: block; min-width: 0; line-height: 1.75; }
 .ssteps .what { margin-right: .25em; }
 .ssteps .mm { display: block; margin-top: 2px; }
-.ssteps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 1.8em; height: 1.8em; border-radius: 50%; display: grid; place-items: center; font: 700 .95rem/1 var(--f-ui); background: var(--ok-bg); color: var(--ok); }
+.ssteps > li::before { content: counter(s); position: absolute; left: 0; top: .2em; width: 1.7em; height: 1.7em; border-radius: 50%; display: grid; place-items: center; font: 700 .9rem/1 var(--f-ui); background: var(--sheet); color: var(--ink-2); border: 1px solid var(--rule-strong); }
 .ssteps .what { font-weight: 600; }
-.ssteps .mm { text-align: left; font-size: 1.15rem; }
+.ssteps .mm { text-align: left; font-size: 1.2rem; }
 .ans { color: var(--ok); font-weight: 700; }
-.result { background: var(--ok-bg); border: 1px solid var(--ok); border-radius: 8px; padding: 8px 12px; font: 600 1.15rem/1.6 var(--f-body); overflow-x: auto; }
+.result { background: var(--ok-bg); border-radius: 8px; padding: 10px 14px; font: 600 1.2rem/1.8 var(--f-body); overflow-x: auto; }
 .result::before { content: "Risultato: "; font: 700 .9rem/1 var(--f-ui); color: var(--ok); }
 .result.sol::before { content: "Soluzioni: "; }
 
@@ -167,7 +161,7 @@ table.tab.narrow { min-width: 0; }
 .gsteps > li.passed::before { content: "✓"; background: var(--ok); color: var(--sheet); }
 .gsteps > li:not(.passed) { background: var(--acc-soft); border-radius: 10px; padding: 10px 10px 12px 2.9em; }
 .gsteps > li:not(.passed)::before { left: 8px; top: 10px; background: var(--acc); color: var(--on-acc); }
-.gq { font-weight: 600; }
+.gq { font-weight: 600; line-height: 1.8; }
 .inrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .inrow input { flex: 1 1 9rem; min-width: 0; max-width: 15rem; font: 500 1.15rem/1.2 var(--f-ui); padding: 11px 12px; border: 1px solid var(--rule-strong); border-radius: 8px; background: var(--field); color: var(--ink); }
 .inrow .pre { font: 400 1.15rem/1.2 var(--f-body); }
@@ -183,7 +177,8 @@ table.tab.narrow { min-width: 0; }
 .btn.sel-ok { border-color: var(--ok); background: var(--ok-bg); }
 .btn.sel-ko { border-color: var(--ko); background: var(--ko-bg); }
 .btn.calc-go::before { content: "🖩"; }
-.hint { color: var(--pen-blue); background: var(--sheet); border: 1px dashed var(--pen-blue); border-radius: 8px; padding: 8px 10px; }
+.hint { color: var(--ink); background: var(--sheet); border-radius: 8px; padding: 8px 12px; line-height: 1.7; }
+.hint::before { content: "Aiuto: "; font-weight: 700; }
 .fb { min-height: 1.3em; font-weight: 600; }
 .fb.ok { color: var(--ok); } .fb.ko { color: var(--ko); } .fb.shown { color: var(--warn); }
 .end { background: var(--ok-bg); border: 1px solid var(--ok); border-radius: 8px; padding: 10px 12px; }
@@ -316,13 +311,52 @@ footer.foot { border-top: 1px solid var(--rule); padding-block: 18px 30px; color
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
 @media print { .calc, .calc-fab, .top { display: none !important; } }
 
+/* ---------- tabella flottante ---------- */
+.tabw { width: min(370px, calc(100vw - 12px)); }
+.tabw .calc-b { padding: 8px; gap: 6px; }
+.tw-scroll { max-height: min(56vh, 520px); overflow: auto; border: 1px solid var(--rule); border-radius: 8px; }
+.calc-page .tw-scroll { max-height: none; }
+.tw-t { border-collapse: collapse; width: 100%; font: 500 1rem/1.25 var(--f-ui); text-align: center; }
+.tw-t thead th { position: sticky; top: 0; z-index: 1; background: var(--formula); font: 700 .85rem/1.2 var(--f-ui); padding: 7px 4px; }
+.tw-t th[scope=row] { font-weight: 700; text-align: left; padding-left: 8px; white-space: nowrap; }
+.tw-t th[scope=row] small { margin-left: 4px; font-size: .7rem; color: var(--ink-2); font-weight: 600; }
+.tw-t td, .tw-t th[scope=row] { padding: 6px 3px; border-top: 1px solid var(--rule); }
+.tw-t tr:nth-child(even) td, .tw-t tr:nth-child(even) th[scope=row] { background: var(--paper); }
+.tw-t .frac { font-size: .9em; }
+.tw-no { font-size: .75rem; color: var(--ink-2); }
+.only1 .tw-big { display: none; }
+.tw-note { font-size: .82rem; color: var(--ink-2); margin: 0; line-height: 1.4; }
+.calc-page.tabw { max-width: 560px; }
+.calc-page .tw-t { font-size: 1.1rem; }
+
+/* ---------- una tappa per schermata ---------- */
+.view[hidden] { display: none !important; }
+.pager { position: fixed; z-index: 44; left: 0; right: 0; bottom: 0; background: var(--sheet); border-top: 1px solid var(--rule); padding: 8px max(12px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+.pager-in { max-width: 860px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) auto auto minmax(0, 1fr); gap: 8px; align-items: center; }
+.pager .btn { justify-content: center; min-height: 46px; }
+.pager .pg-prev { justify-self: start; }
+.pager .pg-next { justify-self: end; }
+.pager .pg-tool { padding: 8px 12px; font-size: .95rem; }
+.pager .pg-tool[aria-pressed="true"] { background: var(--acc-soft); border-color: var(--acc); color: var(--acc-ink); }
+.pager [aria-disabled="true"] { visibility: hidden; }
+.where { font: 600 .85rem/1.2 var(--f-ui); color: var(--ink-2); }
+@media (max-width: 600px) { .pager .pg-lab { display: none; } .pager .btn { padding: 10px 12px; } }
+.pager .btn { white-space: nowrap; }
+.tw-t th[scope=row] small { display: inline-block; margin-left: 5px; padding: 1px 5px; border-radius: 5px; background: var(--acc-soft); color: var(--acc-ink); font-size: .68rem; line-height: 1.3; vertical-align: 1px; }
+.ssteps > li { line-height: 1.95; }
+@media (max-width: 600px) {
+  .pager-in { gap: 6px; }
+  .pager .btn { padding: 10px 11px; font-size: .95rem; }
+  .pager .pg-tool { padding: 10px 9px; font-size: .9rem; }
+}
+
 .cp { max-width: 460px; margin: 0 auto; padding: 16px max(16px, env(safe-area-inset-right, 0px)) 30px max(16px, env(safe-area-inset-left, 0px)); display: grid; gap: 12px; }
 .cp p { color: var(--ink-2); font-size: .95rem; }
 </style>
 </head>
 <body>
 <div class="cp">
-  <p><a href="ripasso-trigonometria.html">← Torna al ripasso</a></p>
+  <p><a href="ripasso-trigonometria.html">← Torna al ripasso</a> · <a href="tabella.html">Tabella degli angoli</a></p>
   <p>DEG = angoli in gradi, RAD = in radianti (tocca il tasto nella barra per cambiare). sin⁻¹, cos⁻¹, tan⁻¹ trovano l'angolo dal valore. Quando riconosce un valore della tabella, sotto il risultato compare la forma esatta (per esempio √3/2).</p>
   <div id="calc-slot"></div>
 </div>
@@ -791,6 +825,86 @@ footer.foot { border-top: 1px solid var(--rule); padding-block: 18px 30px; color
 
 </script>
 <script>
+/* Finestre flottanti (calcolatrice, tabella): si trascinano dalla barra, si riducono con —, si chiudono con ×.
+   Posizione, stato aperto/ridotto restano salvati nel browser. */
+(function () {
+  'use strict';
+  let zTop = 50;
+  window.FLOAT = function (box, o) {
+    // o: { S, save, standalone, corner: 'br' | 'tl', onOpen }
+    const S = o.S, save = o.save, standalone = !!o.standalone;
+    const head = box.querySelector('.calc-h');
+    const minB = box.querySelector('.calc-min'), xB = box.querySelector('.calc-x');
+    const front = () => { if (!standalone) box.style.zIndex = ++zTop; };
+
+    function place() {
+      if (standalone || box.hidden) return;
+      const w = box.offsetWidth, h = box.offsetHeight;
+      const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+      const bottomBar = document.querySelector('.pager') ? 72 : 12;
+      let x = S.x, y = S.y;
+      if (x == null || y == null) {
+        if (o.corner === 'tl') { x = 8; y = 64; } else { x = vw - w - 12; y = vh - h - bottomBar; }
+      }
+      x = Math.max(6, Math.min(x, vw - w - 6));
+      y = Math.max(6, Math.min(y, vh - Math.min(h, 52) - 6));
+      box.style.left = x + 'px'; box.style.top = y + 'px';
+    }
+    function render() {
+      box.hidden = !S.open;
+      box.classList.toggle('is-min', !!S.min && !standalone);
+      if (minB) { minB.textContent = S.min ? '▢' : '—'; minB.setAttribute('aria-label', S.min ? 'Ingrandisci' : 'Riduci'); }
+      if (o.onRender) o.onRender();
+      place();
+    }
+    function open() { S.open = true; S.min = false; save(); render(); front(); if (o.onOpen) o.onOpen(); }
+    function close() { S.open = false; save(); render(); }
+    function toggle() { if (S.open && !S.min) close(); else open(); }
+
+    if (standalone) { S.open = true; S.min = false; head.tabIndex = -1; render(); return { open: open, close: close, toggle: toggle, render: render, isOpen: () => true }; }
+
+    if (minB) minB.addEventListener('click', () => { S.min = !S.min; save(); render(); });
+    if (xB) xB.addEventListener('click', () => { close(); });
+    box.addEventListener('pointerdown', front, true);
+
+    let drag = null;
+    head.addEventListener('pointerdown', ev => {
+      if (ev.target.closest('button')) return;
+      const r = box.getBoundingClientRect();
+      drag = { dx: ev.clientX - r.left, dy: ev.clientY - r.top, id: ev.pointerId, moved: false };
+      head.setPointerCapture(ev.pointerId);
+      box.classList.add('is-drag');
+      ev.preventDefault();
+    });
+    head.addEventListener('pointermove', ev => {
+      if (!drag || ev.pointerId !== drag.id) return;
+      S.x = ev.clientX - drag.dx; S.y = ev.clientY - drag.dy; drag.moved = true;
+      place();
+    });
+    const endDrag = ev => {
+      if (!drag || ev.pointerId !== drag.id) return;
+      box.classList.remove('is-drag');
+      if (drag.moved) { const r = box.getBoundingClientRect(); S.x = r.left; S.y = r.top; save(); }
+      drag = null;
+    };
+    head.addEventListener('pointerup', endDrag);
+    head.addEventListener('pointercancel', endDrag);
+    head.addEventListener('dblclick', ev => { if (ev.target.closest('button')) return; S.min = !S.min; save(); render(); });
+    head.tabIndex = 0;
+    head.addEventListener('keydown', ev => {
+      const d = { ArrowLeft: [-20, 0], ArrowRight: [20, 0], ArrowUp: [0, -20], ArrowDown: [0, 20] }[ev.key];
+      if (!d) return;
+      ev.preventDefault();
+      const r = box.getBoundingClientRect(); S.x = r.left + d[0]; S.y = r.top + d[1]; place(); save();
+    });
+    window.addEventListener('resize', place);
+    render();
+    return { open: open, close: close, toggle: toggle, render: render, isOpen: () => S.open };
+  };
+})();
+
+</script>
+<script>
 /* Calcolatrice scientifica: finestra flottante trascinabile e riducibile (usa il motore TRIG). */
 (function () {
   'use strict';
@@ -832,43 +946,20 @@ footer.foot { border-top: 1px solid var(--rule); padding-block: 18px 30px; color
     '</div>';
   document.body.appendChild(box);
 
-  let fab = null;
-  if (!standalone) {
-    fab = document.createElement('button');
-    fab.type = 'button'; fab.className = 'calc-fab';
-    fab.innerHTML = '<span aria-hidden="true">🖩</span> Calcolatrice';
-    document.body.appendChild(fab);
-    fab.addEventListener('click', () => open());
-  }
-
   const $ = s => box.querySelector(s);
   const inp = $('.calc-in'), outV = $('.calc-v'), outE = $('.calc-e'), modeB = $('.calc-mode'), hist = $('.calc-hist');
   // sul telefono i tasti della pagina bastano: niente tastiera del sistema che copre tutto
   if (window.matchMedia && matchMedia('(pointer: coarse)').matches) inp.setAttribute('inputmode', 'none');
 
-  function render() {
-    box.hidden = !S.open;
-    if (fab) fab.hidden = S.open;
-    box.classList.toggle('is-min', !!S.min && !standalone);
-    const mb = $('.calc-min'); if (mb) { mb.textContent = S.min ? '▢' : '—'; mb.setAttribute('aria-label', S.min ? 'Ingrandisci' : 'Riduci'); }
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function paint() {
     modeB.textContent = S.deg ? 'DEG' : 'RAD';
     modeB.title = S.deg ? 'Angoli in gradi (DEG). Tocca per passare ai radianti.' : 'Angoli in radianti (RAD). Tocca per passare ai gradi.';
     modeB.classList.toggle('is-rad', !S.deg);
     hist.innerHTML = S.hist.length ? S.hist.map((h, i) => '<button type="button" class="ch" data-h="' + i + '"><span>' + esc(h.e) + '</span> = <b>' + esc(h.r) + '</b></button>').join('') : '';
-    place();
   }
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-
-  function place() {
-    if (standalone || box.hidden) return;
-    const w = box.offsetWidth, h = box.offsetHeight;
-    const vw = document.documentElement.clientWidth, vh = window.innerHeight;
-    let x = S.x, y = S.y;
-    if (x == null || y == null) { x = vw - w - 12; y = vh - h - 12; }
-    x = Math.max(6, Math.min(x, vw - w - 6));
-    y = Math.max(6, Math.min(y, vh - Math.min(h, 52) - 6));
-    box.style.left = x + 'px'; box.style.top = y + 'px';
-  }
+  const win = window.FLOAT(box, { S: S, save: save, standalone: standalone, corner: 'br', onRender: paint, onOpen: () => setTimeout(() => inp.focus({ preventScroll: true }), 30) });
+  const render = win.render;
 
   function preview(final) {
     const src = inp.value;
@@ -939,52 +1030,11 @@ footer.foot { border-top: 1px solid var(--rule); padding-block: 18px 30px; color
   inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); equals(); } });
   modeB.addEventListener('click', () => { S.deg = !S.deg; save(); render(); preview(false); });
   hist.addEventListener('click', ev => { const b = ev.target.closest('.ch'); if (!b) return; inp.value = S.hist[+b.dataset.h].e; box.classList.remove('is-done'); preview(false); });
-  if (!standalone) {
-    $('.calc-min').addEventListener('click', () => { S.min = !S.min; save(); render(); });
-    $('.calc-x').addEventListener('click', () => { S.open = false; save(); render(); if (fab) fab.focus(); });
-  }
-
-  // ---- trascinamento dalla barra del titolo (mouse, dito e penna)
-  const head = $('.calc-h');
-  let drag = null;
-  head.addEventListener('pointerdown', ev => {
-    if (standalone || ev.target.closest('button')) return;
-    const r = box.getBoundingClientRect();
-    drag = { dx: ev.clientX - r.left, dy: ev.clientY - r.top, id: ev.pointerId, moved: false };
-    head.setPointerCapture(ev.pointerId);
-    box.classList.add('is-drag');
-    ev.preventDefault();
-  });
-  head.addEventListener('pointermove', ev => {
-    if (!drag || ev.pointerId !== drag.id) return;
-    S.x = ev.clientX - drag.dx; S.y = ev.clientY - drag.dy; drag.moved = true;
-    place();
-  });
-  const endDrag = ev => {
-    if (!drag || ev.pointerId !== drag.id) return;
-    box.classList.remove('is-drag');
-    if (drag.moved) { const r = box.getBoundingClientRect(); S.x = r.left; S.y = r.top; save(); }
-    drag = null;
-  };
-  head.addEventListener('pointerup', endDrag);
-  head.addEventListener('pointercancel', endDrag);
-  head.addEventListener('dblclick', ev => { if (standalone || ev.target.closest('button')) return; S.min = !S.min; save(); render(); });
-  // con la tastiera: frecce sulla barra spostano la finestra
-  head.tabIndex = standalone ? -1 : 0;
-  head.addEventListener('keydown', ev => {
-    const d = { ArrowLeft: [-20, 0], ArrowRight: [20, 0], ArrowUp: [0, -20], ArrowDown: [0, 20] }[ev.key];
-    if (!d || standalone) return;
-    ev.preventDefault();
-    const r = box.getBoundingClientRect(); S.x = r.left + d[0]; S.y = r.top + d[1]; place(); save();
-  });
-  window.addEventListener('resize', place);
-
   function open(expr) {
-    S.open = true; S.min = false; save(); render();
+    win.open();
     if (expr != null) { inp.value = expr; box.classList.remove('is-done'); preview(false); }
-    setTimeout(() => inp.focus({ preventScroll: true }), 30);
   }
-  window.CALC = { open: open, toggle: () => { if (S.open && !S.min) { S.open = false; save(); render(); } else open(); }, isOpen: () => S.open };
+  window.CALC = { open: open, toggle: win.toggle, isOpen: win.isOpen };
   render();
   preview(false);
 })();
